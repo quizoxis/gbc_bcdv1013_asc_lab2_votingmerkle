@@ -7,7 +7,7 @@ contract Voting {
     uint256 noVotes;
 
     constructor(bytes32 eligibleVotersMerkleRoot_) public {
-        eligibleVotersMerkleRoot = eligibleVotersMerkleRoot_;
+        eligibleVotersMerkleRoot = eligibleVotersMerkleRoot_ ;
     }
 
     function leafHash(address leaf) private pure returns(bytes32) {
@@ -26,5 +26,20 @@ contract Voting {
         else noVotes++;
 
         // EDIT ME: validate the proof!
+          bytes32 nLeafHash;
+        nLeafHash = leafHash(msg.sender);
+        for(uint32 i=0; i< witnesses.length; i++) {
+            if((path & 1)==1) {
+                nLeafHash = nodeHash(witnesses[i], nLeafHash);
+            }
+            else {
+                nLeafHash = nodeHash(nLeafHash, witnesses[i]);
+            }
+
+            path = path >>1;
+        }
+
+        require(eligibleVotersMerkleRoot == nLeafHash, "Its a no match!!!");
+
     }
 }
